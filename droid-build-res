@@ -1,0 +1,35 @@
+#!/bin/bash
+print_usage()
+{
+	cat <<HEREDOC
+Usage: droid-build-res SIZE FILE...
+Build Android res for multiple screen DPI
+
+	SIZE The image size under 160DPI
+HEREDOC
+}
+
+if [[ $# -lt 2 ]]; then
+	print_usage
+	exit 1
+fi
+if ! [[ $1 =~ "^[0-9]+$" ]]; then
+	print_usage
+	exit 1
+fi
+
+mkdir -p drawable-mdpi drawable-hdpi drawable-xhdpi drawable-xxhdpi drawable-xxxhdpi
+size160=$1
+size240=$(bc <<< "${size160} * 1.5 / 1")
+size320=$((size160 * 2))
+size480=$((size160 * 3))
+size640=$((size160 * 4))
+shift 1
+
+for src in "$@"; do
+	convert $src -resize ${size160}x${size160} -quality 98 drawable-mdpi/$src
+	convert $src -resize ${size240}x${size240} -quality 98 drawable-hdpi/$src
+	convert $src -resize ${size320}x${size320} -quality 98 drawable-xhdpi/$src
+	convert $src -resize ${size480}x${size480} -quality 98 drawable-xxhdpi/$src
+	convert $src -resize ${size640}x${size640} -quality 98 drawable-xxxhdpi/$src
+done
