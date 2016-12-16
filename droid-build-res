@@ -25,11 +25,12 @@ size320=$((size160 * 2))
 size480=$((size160 * 3))
 size640=$((size160 * 4))
 shift 1
+args="-interpolate nearest-neighbor -quality 98"
 
 for src in "$@"; do
-	convert $src -resize ${size160}x${size160} -quality 98 drawable-mdpi/$src
-	convert $src -resize ${size240}x${size240} -quality 98 drawable-hdpi/$src
-	convert $src -resize ${size320}x${size320} -quality 98 drawable-xhdpi/$src
-	convert $src -resize ${size480}x${size480} -quality 98 drawable-xxhdpi/$src
-	convert $src -resize ${size640}x${size640} -quality 98 drawable-xxxhdpi/$src
+	convert $src -interpolative-resize ${size160}x${size160} $args drawable-mdpi/$src
+	convert $src -interpolative-resize ${size240}x${size240} $args drawable-hdpi/$src
+	convert $src -interpolative-resize ${size320}x${size320} $args drawable-xhdpi/$src
+	convert $src -interpolative-resize ${size480}x${size480} $args drawable-xxhdpi/$src
+	convert $src -interpolative-resize ${size640}x${size640} $args drawable-xxxhdpi/$src
 done
