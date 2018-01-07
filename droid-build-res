@@ -2,23 +2,36 @@
 print_usage()
 {
 	cat <<HEREDOC
-Usage: droid-build-res SIZE FILE...
+Usage: droid-build-res [-m] SIZE FILE...
 Build Android res for multiple screen DPI
 
+	-m Place output files in mipmap-* instead of drawable-*
 	SIZE The image size under 160DPI
 HEREDOC
 }
 
+is_drawable=true
+
 if [[ $# -lt 2 ]]; then
 	print_usage
 	exit 1
+fi
+if [[ $1 == "-m" ]]; then
+	is_drawable=false
+	shift
 fi
 if ! [[ $1 =~ ^[0-9]+$ ]]; then
 	print_usage
 	exit 1
 fi
 
-mkdir -p drawable-mdpi drawable-hdpi drawable-xhdpi drawable-xxhdpi drawable-xxxhdpi
+if [[ "$is_drawable" == true ]]; then
+	dir_prefix="drawable"
+else
+	dir_prefix="mipmap"
+fi
+
+mkdir -p $dir_prefix-mdpi $dir_prefix-hdpi $dir_prefix-xhdpi $dir_prefix-xxhdpi $dir_prefix-xxxhdpi
 size160=$1
 size240=$(bc <<< "${size160} * 1.5 / 1")
 size320=$((size160 * 2))
@@ -28,9 +41,9 @@ shift 1
 args="-interpolate nearest-neighbor -quality 98"
 
 for src in "$@"; do
-	convert $src -interpolative-resize ${size160}x${size160} $args drawable-mdpi/$src
-	convert $src -interpolative-resize ${size240}x${size240} $args drawable-hdpi/$src
-	convert $src -interpolative-resize ${size320}x${size320} $args drawable-xhdpi/$src
-	convert $src -interpolative-resize ${size480}x${size480} $args drawable-xxhdpi/$src
-	convert $src -interpolative-resize ${size640}x${size640} $args drawable-xxxhdpi/$src
+	convert $src -interpolative-resize ${size160}x${size160} $args $dir_prefix-mdpi/$src
+	convert $src -interpolative-resize ${size240}x${size240} $args $dir_prefix-hdpi/$src
+	convert $src -interpolative-resize ${size320}x${size320} $args $dir_prefix-xhdpi/$src
+	convert $src -interpolative-resize ${size480}x${size480} $args $dir_prefix-xxhdpi/$src
+	convert $src -interpolative-resize ${size640}x${size640} $args $dir_prefix-xxxhdpi/$src
 done
